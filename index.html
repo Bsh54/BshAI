@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BshAI - Assistant Intelligent en Langue Fon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0a0f1e;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0 30px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            margin-bottom: 20px;
+        }
+        
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+
+            min-height: 350px;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.6;
+        }
+        
+        .user-message {
+            background-color: #1e3a8a;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .ai-message {
+            background-color: #374151;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-header {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+        
+        .message-content {
+            font-size: 1.08rem;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        textarea {
+            flex-grow: 1;
+            padding: 16px;
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            color: #f1f5f9;
+            font-size: 1.05rem;
+            resize: none;
+            min-height: 60px;
+            max-height: 150px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        
+        button:disabled {
+            background-color: #4b5563;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            color: #9ca3af;
+            font-style: italic;
+            min-height: 24px;
+        }
+        
+        .language-badge {
+            display: inline-block;
+            background-color: #7c3aed;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0 10px;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #334155;
+            margin-top: 10px;
+        }
+        
+        /* Scrollbar styling */
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .messages::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        
+        .messages::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Modal de sélection de langue */
+        .language-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .language-modal.active {
+            display: flex;
+        }
+
+        .language-modal-content {
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #3b82f6;
+        }
+
+        .language-modal h2 {
+            color: #3b82f6;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .language-modal p {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .language-btn {
+            flex: 1;
+            padding: 20px 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-btn:hover {
+            background-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .language-btn.selected {
+            background-color: #3b82f6;
+            border-color: #8b5cf6;
+        }
+
+        .language-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #7c3aed;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .language-indicator:hover {
+            background-color: #6d28d9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .input-area {
+                flex-direction: column;
+            }
+            
+            button {
+                padding: 15px;
+                width: 100%;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de sélection de langue -->
+    <div class="language-modal active" id="languageModal">
+        <div class="language-modal-content">
+            <h2>Choisissez votre langue</h2>
+            <p>Sélectionnez la langue dans laquelle vous souhaitez recevoir les réponses audio</p>
+            <div class="language-buttons">
+                <button class="language-btn" onclick="selectLanguage('fon')">
+                    🇧🇯 Fon
+                </button>
+                <button class="language-btn" onclick="selectLanguage('yo')">
+                    🇳🇬 Yoruba
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>BshAI</h1>
+            <span class="language-indicator" id="languageIndicator" onclick="showLanguageModal()">
+                Langue: Fon
+            </span>
+        </header>
+        
+        <div class="chat-container">
+            <div class="messages" id="messagesContainer">
+                <div class="empty-state" id="emptyState">
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <textarea
+                    id="questionInput"
+                    placeholder="Posez votre question ici..."
+                    rows="3"
+                ></textarea>
+                <button id="sendButton">Envoyer</button>
+            </div>
+            
+            <div class="status" id="status"></div>
+        </div>
+        
+        <footer>
+            <p>BshAI - Assistant Intelligent en Langues Fon et Yoruba</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration des API
+        const DEEPSEEK_API_URL = "https://shads229-personnal-ai.hf.space/v1/chat/completions";
+        const DEEPSEEK_API_KEY = "Shadobsh";
+        const DEEPSEEK_MODEL = "deepseek-chat";
+
+        const TRANSLATE_API_URL = "https://shadsai2api-cloudflare.shadobsh.workers.dev/v1/chat/completions";
+        const TRANSLATE_API_KEY = "1";
+
+        const GRADIO_TTS_API_URL = "https://shads229-fonspeak.hf.space/generate_audio";
+
+        const SOURCE_LANG = "fr";
+        let TARGET_LANG = "fon"; // Langue par défaut
+        let selectedLanguage = "fon"; // Langue sélectionnée pour TTS (fon ou yo)
+
+        // État de l'application
+        let conversationHistory = [];
+        let isProcessing = false;
+        
+        // Éléments DOM
+        const questionInput = document.getElementById('questionInput');
+        const sendButton = document.getElementById('sendButton');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const statusElement = document.getElementById('status');
+        const emptyState = document.getElementById('emptyState');
+        const languageModal = document.getElementById('languageModal');
+        const languageIndicator = document.getElementById('languageIndicator');
+
+        // Fonction pour sélectionner la langue
+        function selectLanguage(lang) {
+            selectedLanguage = lang;
+            TARGET_LANG = lang;
+
+            // Mettre à jour l'indicateur
+            const langName = lang === 'fon' ? 'Fon' : 'Yoruba';
+            const langFlag = lang === 'fon' ? '🇧🇯' : '🇳🇬';
+            languageIndicator.textContent = `${langFlag} ${langName}`;
+
+            // Fermer le modal
+            languageModal.classList.remove('active');
+
+            // Focus sur le champ de saisie
+            questionInput.focus();
+        }
+
+        // Fonction pour afficher le modal de sélection de langue
+        function showLanguageModal() {
+            languageModal.classList.add('active');
+        }
+        
+        // Fonction pour ajouter un message à l'interface
+        function addMessageToUI(role, content, audioSrc = null) {
+            // Masquer l'état vide si c'est le premier message
+            if (emptyState.style.display !== 'none') {
+                emptyState.style.display = 'none';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            header.textContent = role === 'user' ? 'Vous' : 'bshAI';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+
+            messageDiv.appendChild(header);
+            messageDiv.appendChild(contentDiv);
+
+            if (audioSrc && role === 'ai') { // Seulement pour les messages de l'IA
+                const audioPlayer = document.createElement('audio');
+                audioPlayer.controls = true;
+                audioPlayer.src = audioSrc;
+                audioPlayer.style.marginTop = '10px';
+                audioPlayer.style.width = '100%';
+                messageDiv.appendChild(audioPlayer);
+            }
+
+            messagesContainer.appendChild(messageDiv);
+
+            // Faire défiler vers le bas pour voir le nouveau message
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Fonction pour mettre à jour le statut
+        function setStatus(text) {
+            statusElement.textContent = text;
+        }
+        
+        // Fonction pour nettoyer le texte avant traduction
+        function cleanTextForTranslation(text) {
+            if (!text) return "";
+            
+            // Expressions régulières pour nettoyer le markdown
+            const patterns = [
+                { regex: /\[([^\]]+)\]\([^)]+\)/g, replacement: '$1' },  // Liens
+                { regex: /!\[([^\]]*)\]\([^)]+\)/g, replacement: '' },   // Images
+                { regex: /`([^`]+)`/g, replacement: '$1' },              // Code inline
+                { regex: /```[\s\S]*?```/g, replacement: '' },           // Blocs de code
+                { regex: /^#{1,6}\s+/gm, replacement: '' },              // Titres
+                { regex: /\*\*([^*]+)\*\*/g, replacement: '$1' },        // Gras
+                { regex: /\*([^*]+)\*/g, replacement: '$1' },            // Italique
+                { regex: /<[^>]+>/g, replacement: '' },                  // Balises HTML
+                { regex: /\s+/g, replacement: ' ' }                      // Espaces multiples
+            ];
+            
+            let cleanedText = text;
+            patterns.forEach(pattern => {
+                cleanedText = cleanedText.replace(pattern.regex, pattern.replacement);
+            });
+            
+            // Nettoyer les caractères non imprimables
+            cleanedText = cleanedText.split('').filter(char => 
+                char.charCodeAt(0) >= 32 || char === '\n' || char === '\t' || char === '\r'
+            ).join('');
+            
+            // Nettoyer les débuts et fins
+            cleanedText = cleanedText.trim();
+            
+            // Ajouter un point à la fin si nécessaire
+            if (cleanedText && !/[.!?]$/.test(cleanedText)) {
+                cleanedText += '.';
+            }
+            
+            return cleanedText;
+        }
+        
+        // Fonction pour obtenir la réponse de DeepSeek
+        async function getDeepSeekResponse(question) {
+            // Ajouter la question à l'historique de conversation
+            conversationHistory.push({ role: "user", content: question });
+
+            // Préparer les messages pour l'API
+            const messages = [
+                { role: "system", content: "Vous êtes BshAI, un assistant intelligent qui répond en français de manière claire, concise et utile." },
+                ...conversationHistory.slice(-12) // Garder seulement les 12 derniers messages pour éviter les limites de tokens
+            ];
+
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
+            };
+
+            const payload = {
+                model: DEEPSEEK_MODEL,
+                messages: messages,
+                temperature: 0.8,
+                stream: false
+            };
+
+            try {
+                const response = await fetch(DEEPSEEK_API_URL, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const rawResponse = data?.choices?.[0]?.message?.content || "";
+
+                // Nettoyer la réponse
+                if (rawResponse) {
+                    const cleanedText = cleanTextForTranslation(rawResponse);
+
+                    // Ajouter la réponse à l'historique (en français)
+                    conversationHistory.push({ role: "assistant", content: cleanedText });
+
+                    return cleanedText;
+                }
+
+                return null;
+
+            } catch (error) {
+                console.error("Erreur bshAI:", error);
+                return null;
+            }
+        }
+        
+        // Fonction pour traduire le texte
+        async function translateText(text) {
+            if (!text || text.trim().length < 3) {
+                console.log("Texte trop court ou vide");
+                return null;
+            }
+            
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${TRANSLATE_API_KEY}`
+            };
+            
+            const payload = {
+                model: "google-translate",
+                messages: [{ role: "user", content: text }],
+                source_lang: SOURCE_LANG,
+                target_lang: TARGET_LANG,
+                stream: false
+            };
+            
+            try {
+                const response = await fetch(TRANSLATE_API_URL, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur traduction HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data?.choices?.[0]?.message?.content || "";
+                    
+            } catch (error) {
+                console.error("Erreur traduction:", error);
+                return null;
+            }
+        }
+
+        // Fonction pour obtenir l'audio (Fon ou Yoruba) depuis l'API FastAPI
+        async function getAudio(text, language) {
+            if (!text) return null;
+
+            try {
+                const response = await fetch(GRADIO_TTS_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        language: language
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP lors de la récupération de l'audio: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const audioBase64 = data?.audio_base64;
+                const samplingRate = data?.sampling_rate;
+
+                if (!audioBase64 || !samplingRate) {
+                    throw new Error("Données audio Base64 ou taux d'échantillonnage manquants dans la réponse de l'API.");
+                }
+
+                // Décoder la chaîne Base64 en un tableau de bytes
+                const audioBytes = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+                // Créer un Blob audio
+                const audioBlob = new Blob([audioBytes], { type: 'audio/wav' });
+                // Créer une URL d'objet pour le Blob (utile pour les éléments audio HTML)
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                return audioUrl;
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération de l'audio:", error);
+                return null;
+            }
+        }
+
+        // Fonction principale de traitement
+        async function processQuestion() {
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                setStatus("Veuillez saisir une question.");
+                return;
+            }
+
+            if (isProcessing) return;
+
+            // Désactiver l'interface pendant le traitement
+            isProcessing = true;
+            sendButton.disabled = true;
+            questionInput.disabled = true;
+
+            // Ajouter la question de l'utilisateur à l'interface
+            addMessageToUI('user', question);
+
+            // Effacer le champ de saisie
+            questionInput.value = '';
+
+            // Afficher le statut
+            setStatus("Génération de la réponse...");
+
+            try {
+                // Étape 1: Obtenir la réponse de DeepSeek
+                const deepseekResponse = await getDeepSeekResponse(question);
+
+                if (!deepseekResponse) {
+                    throw new Error("Impossible d'obtenir une réponse de bshAI.");
+                }
+
+                // Étape 2: Traduire la réponse
+                const langName = selectedLanguage === 'fon' ? 'Fon' : 'Yoruba';
+                setStatus(`Traduction en ${langName}...`);
+                const translation = await translateText(deepseekResponse);
+
+                if (!translation) {
+                    throw new Error("Problème avec la traduction.");
+                }
+
+                // Étape 3: Obtenir l'audio
+                setStatus("Génération de l'audio...");
+                const audioUrl = await getAudio(translation, selectedLanguage);
+
+                if (!audioUrl) {
+                    throw new Error("Impossible de générer l'audio.");
+                }
+
+                // Ajouter UNIQUEMENT la traduction et l'audio à l'interface
+                addMessageToUI('ai', translation, audioUrl);
+
+                setStatus("");
+
+            } catch (error) {
+                console.error(error);
+                setStatus(`Erreur: ${error.message}`);
+
+                // Ajouter un message d'erreur à l'interface
+                addMessageToUI('ai', "Désolé, une erreur s'est produite. Veuillez réessayer.");
+            } finally {
+                // Réactiver l'interface
+                isProcessing = false;
+                sendButton.disabled = false;
+                questionInput.disabled = false;
+                questionInput.focus();
+            }
+        }
+        
+        // Gestionnaire d'événements pour le bouton Envoyer
+        sendButton.addEventListener('click', processQuestion);
+        
+        // Gestionnaire d'événements pour la touche Entrée
+        questionInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                processQuestion();
+            }
+        });
+        
+        // Gestionnaire pour ajuster la hauteur du textarea automatiquement
+        questionInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Focus sur le champ de saisie au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            questionInput.focus();
+        });
+    </script>
+</body>
+</html>
