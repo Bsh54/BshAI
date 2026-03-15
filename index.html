@@ -66,7 +66,6 @@
             background-color: #1e293b;
             border-radius: 12px;
             border: 1px solid #334155;
-
             min-height: 350px;
         }
         
@@ -374,8 +373,8 @@
         const GRADIO_TTS_API_URL = "https://shads229-fonspeak.hf.space/generate_audio";
 
         const SOURCE_LANG = "fr";
-        let TARGET_LANG = "fon"; // Langue par défaut
-        let selectedLanguage = "fon"; // Langue sélectionnée pour TTS (fon ou yo)
+        let TARGET_LANG = "fon";
+        let selectedLanguage = "fon";
 
         // État de l'application
         let conversationHistory = [];
@@ -395,26 +394,19 @@
             selectedLanguage = lang;
             TARGET_LANG = lang;
 
-            // Mettre à jour l'indicateur
             const langName = lang === 'fon' ? 'Fon' : 'Yoruba';
             const langFlag = lang === 'fon' ? '🇧🇯' : '🇳🇬';
             languageIndicator.textContent = `${langFlag} ${langName}`;
 
-            // Fermer le modal
             languageModal.classList.remove('active');
-
-            // Focus sur le champ de saisie
             questionInput.focus();
         }
 
-        // Fonction pour afficher le modal de sélection de langue
         function showLanguageModal() {
             languageModal.classList.add('active');
         }
         
-        // Fonction pour ajouter un message à l'interface
         function addMessageToUI(role, content, audioSrc = null) {
-            // Masquer l'état vide si c'est le premier message
             if (emptyState.style.display !== 'none') {
                 emptyState.style.display = 'none';
             }
@@ -433,7 +425,7 @@
             messageDiv.appendChild(header);
             messageDiv.appendChild(contentDiv);
 
-            if (audioSrc && role === 'ai') { // Seulement pour les messages de l'IA
+            if (audioSrc && role === 'ai') {
                 const audioPlayer = document.createElement('audio');
                 audioPlayer.controls = true;
                 audioPlayer.src = audioSrc;
@@ -443,31 +435,26 @@
             }
 
             messagesContainer.appendChild(messageDiv);
-
-            // Faire défiler vers le bas pour voir le nouveau message
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
-        // Fonction pour mettre à jour le statut
         function setStatus(text) {
             statusElement.textContent = text;
         }
         
-        // Fonction pour nettoyer le texte avant traduction
         function cleanTextForTranslation(text) {
             if (!text) return "";
             
-            // Expressions régulières pour nettoyer le markdown
             const patterns = [
-                { regex: /\[([^\]]+)\]\([^)]+\)/g, replacement: '$1' },  // Liens
-                { regex: /!\[([^\]]*)\]\([^)]+\)/g, replacement: '' },   // Images
-                { regex: /`([^`]+)`/g, replacement: '$1' },              // Code inline
-                { regex: /```[\s\S]*?```/g, replacement: '' },           // Blocs de code
-                { regex: /^#{1,6}\s+/gm, replacement: '' },              // Titres
-                { regex: /\*\*([^*]+)\*\*/g, replacement: '$1' },        // Gras
-                { regex: /\*([^*]+)\*/g, replacement: '$1' },            // Italique
-                { regex: /<[^>]+>/g, replacement: '' },                  // Balises HTML
-                { regex: /\s+/g, replacement: ' ' }                      // Espaces multiples
+                { regex: /\[([^\]]+)\]\([^)]+\)/g, replacement: '$1' },
+                { regex: /!\[([^\]]*)\]\([^)]+\)/g, replacement: '' },
+                { regex: /`([^`]+)`/g, replacement: '$1' },
+                { regex: /```[\s\S]*?```/g, replacement: '' },
+                { regex: /^#{1,6}\s+/gm, replacement: '' },
+                { regex: /\*\*([^*]+)\*\*/g, replacement: '$1' },
+                { regex: /\*([^*]+)\*/g, replacement: '$1' },
+                { regex: /<[^>]+>/g, replacement: '' },
+                { regex: /\s+/g, replacement: ' ' }
             ];
             
             let cleanedText = text;
@@ -475,15 +462,12 @@
                 cleanedText = cleanedText.replace(pattern.regex, pattern.replacement);
             });
             
-            // Nettoyer les caractères non imprimables
             cleanedText = cleanedText.split('').filter(char => 
                 char.charCodeAt(0) >= 32 || char === '\n' || char === '\t' || char === '\r'
             ).join('');
             
-            // Nettoyer les débuts et fins
             cleanedText = cleanedText.trim();
             
-            // Ajouter un point à la fin si nécessaire
             if (cleanedText && !/[.!?]$/.test(cleanedText)) {
                 cleanedText += '.';
             }
@@ -491,15 +475,28 @@
             return cleanedText;
         }
         
-        // Fonction pour obtenir la réponse de DeepSeek
         async function getDeepSeekResponse(question) {
-            // Ajouter la question à l'historique de conversation
             conversationHistory.push({ role: "user", content: question });
 
-            // Préparer les messages pour l'API
+            // PROMPT SYSTÈME CORRIGÉ - BEAUCOUP PLUS STRICT
+            const systemPrompt = `Tu es BshAI, un assistant conversationnel concis. 
+RÈGLES IMPÉRATIVES :
+- Réponds en MAXIMUM 2 PHRASES
+- Sois DIRECT et VA À L'ESSENTIEL
+- Pas de formules de politesse inutiles
+- Pas de répétitions
+- Une conversation humaine = brève et naturelle
+
+EXEMPLE :
+User: "Comment vas-tu ?"
+BshAI: "Je vais bien, merci ! Puis-je t'aider ?"
+
+User: "Quelle est la capitale du Bénin ?"
+BshAI: "La capitale du Bénin est Porto-Novo."`;
+
             const messages = [
-                { role: "system", content: "Vous êtes BshAI, un assistant intelligent qui répond en français de manière claire, concise et utile.Soyez court , vous ete censer mener une conversation humaine " },
-                ...conversationHistory.slice(-12) // Garder seulement les 12 derniers messages pour éviter les limites de tokens
+                { role: "system", content: systemPrompt },
+                ...conversationHistory.slice(-8) // Garder les 8 derniers échanges
             ];
 
             const headers = {
@@ -510,7 +507,8 @@
             const payload = {
                 model: DEEPSEEK_MODEL,
                 messages: messages,
-                temperature: 0.5,
+                temperature: 0.3, // Température plus basse = réponses plus prévisibles et courtes
+                max_tokens: 100, // LIMITATION DIRECTE DES TOKENS !
                 stream: false
             };
 
@@ -528,13 +526,9 @@
                 const data = await response.json();
                 const rawResponse = data?.choices?.[0]?.message?.content || "";
 
-                // Nettoyer la réponse
                 if (rawResponse) {
                     const cleanedText = cleanTextForTranslation(rawResponse);
-
-                    // Ajouter la réponse à l'historique (en français)
                     conversationHistory.push({ role: "assistant", content: cleanedText });
-
                     return cleanedText;
                 }
 
@@ -546,7 +540,6 @@
             }
         }
         
-        // Fonction pour traduire le texte
         async function translateText(text) {
             if (!text || text.trim().length < 3) {
                 console.log("Texte trop court ou vide");
@@ -586,7 +579,6 @@
             }
         }
 
-        // Fonction pour obtenir l'audio (Fon ou Yoruba) depuis l'API FastAPI
         async function getAudio(text, language) {
             if (!text) return null;
 
@@ -614,11 +606,8 @@
                     throw new Error("Données audio Base64 ou taux d'échantillonnage manquants dans la réponse de l'API.");
                 }
 
-                // Décoder la chaîne Base64 en un tableau de bytes
                 const audioBytes = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
-                // Créer un Blob audio
                 const audioBlob = new Blob([audioBytes], { type: 'audio/wav' });
-                // Créer une URL d'objet pour le Blob (utile pour les éléments audio HTML)
                 const audioUrl = URL.createObjectURL(audioBlob);
 
                 return audioUrl;
@@ -629,7 +618,6 @@
             }
         }
 
-        // Fonction principale de traitement
         async function processQuestion() {
             const question = questionInput.value.trim();
 
@@ -640,29 +628,22 @@
 
             if (isProcessing) return;
 
-            // Désactiver l'interface pendant le traitement
             isProcessing = true;
             sendButton.disabled = true;
             questionInput.disabled = true;
 
-            // Ajouter la question de l'utilisateur à l'interface
             addMessageToUI('user', question);
-
-            // Effacer le champ de saisie
             questionInput.value = '';
 
-            // Afficher le statut
             setStatus("Génération de la réponse...");
 
             try {
-                // Étape 1: Obtenir la réponse de DeepSeek
                 const deepseekResponse = await getDeepSeekResponse(question);
 
                 if (!deepseekResponse) {
                     throw new Error("Impossible d'obtenir une réponse de bshAI.");
                 }
 
-                // Étape 2: Traduire la réponse
                 const langName = selectedLanguage === 'fon' ? 'Fon' : 'Yoruba';
                 setStatus(`Traduction en ${langName}...`);
                 const translation = await translateText(deepseekResponse);
@@ -671,7 +652,6 @@
                     throw new Error("Problème avec la traduction.");
                 }
 
-                // Étape 3: Obtenir l'audio
                 setStatus("Génération de l'audio...");
                 const audioUrl = await getAudio(translation, selectedLanguage);
 
@@ -679,19 +659,14 @@
                     throw new Error("Impossible de générer l'audio.");
                 }
 
-                // Ajouter UNIQUEMENT la traduction et l'audio à l'interface
                 addMessageToUI('ai', translation, audioUrl);
-
                 setStatus("");
 
             } catch (error) {
                 console.error(error);
                 setStatus(`Erreur: ${error.message}`);
-
-                // Ajouter un message d'erreur à l'interface
                 addMessageToUI('ai', "Désolé, une erreur s'est produite. Veuillez réessayer.");
             } finally {
-                // Réactiver l'interface
                 isProcessing = false;
                 sendButton.disabled = false;
                 questionInput.disabled = false;
@@ -699,10 +674,8 @@
             }
         }
         
-        // Gestionnaire d'événements pour le bouton Envoyer
         sendButton.addEventListener('click', processQuestion);
         
-        // Gestionnaire d'événements pour la touche Entrée
         questionInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -710,13 +683,11 @@
             }
         });
         
-        // Gestionnaire pour ajuster la hauteur du textarea automatiquement
         questionInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
         
-        // Focus sur le champ de saisie au chargement
         window.addEventListener('DOMContentLoaded', () => {
             questionInput.focus();
         });
