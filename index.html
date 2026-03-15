@@ -498,7 +498,7 @@
 
             // Préparer les messages pour l'API
             const messages = [
-                { role: "system", content: "Vous êtes BshAI, un assistant intelligent qui répond en français de manière claire, concise et utile." },
+                { role: "system", content: "Vous êtes BshAI, un assistant intelligent qui répond en français de manière claire, concise et utile.Soyez court , vous ete censer mener une conversation humaine " },
                 ...conversationHistory.slice(-12) // Garder seulement les 12 derniers messages pour éviter les limites de tokens
             ];
 
@@ -510,7 +510,7 @@
             const payload = {
                 model: DEEPSEEK_MODEL,
                 messages: messages,
-                temperature: 0.8,
+                temperature: 0.5,
                 stream: false
             };
 
