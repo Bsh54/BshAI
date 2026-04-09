@@ -4,206 +4,264 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BshAI - Assistant Intelligent en Langue Fon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
+        :root {
+            --primary: #2563EB;
+            --secondary: #3B82F6;
+            --cta: #F97316;
+            --bg: #F8FAFC;
+            --text: #1E293B;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --dark-bg: #0F172A;
+            --dark-surface: #1E293B;
+            --dark-text: #F1F5F9;
+        }
+
         body {
-            background-color: #0a0f1e;
-            color: #e2e8f0;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f3a 100%);
+            color: var(--dark-text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            font-family: 'Noto Sans', sans-serif;
         }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             margin: 0 auto;
-            padding: 25px;
+            padding: 20px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
-        
+
         header {
             text-align: center;
-            padding: 20px 0 30px;
-            border-bottom: 1px solid #334155;
+            padding: 30px 0;
             margin-bottom: 20px;
         }
-        
+
         h1 {
-            font-size: 2.8rem;
-            color: #3b82f6;
-            margin-bottom: 8px;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--cta));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
-        
+
         .subtitle {
-            color: #94a3b8;
-            font-size: 1.1rem;
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 400;
         }
-        
+
         .chat-container {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 16px;
             margin-bottom: 20px;
         }
-        
+
         .messages {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 15px;
-            background-color: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            min-height: 350px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            min-height: 400px;
+            backdrop-filter: blur(10px);
         }
-        
+
         .message {
-            margin-bottom: 20px;
-            padding: 18px;
+            margin-bottom: 16px;
+            padding: 14px 16px;
             border-radius: 12px;
             max-width: 85%;
             line-height: 1.6;
+            animation: slideIn 0.3s ease-out;
         }
-        
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .user-message {
-            background-color: #1e3a8a;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             margin-left: auto;
             border-bottom-right-radius: 4px;
+            color: white;
         }
-        
+
         .ai-message {
-            background-color: #374151;
+            background: rgba(59, 130, 246, 0.1);
             margin-right: auto;
             border-bottom-left-radius: 4px;
+            border-left: 3px solid var(--primary);
         }
-        
+
         .message-header {
             font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: #d1d5db;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
-        
+
         .message-content {
-            font-size: 1.08rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
-        
+
         .input-area {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            align-items: flex-end;
         }
-        
+
         textarea {
             flex-grow: 1;
-            padding: 16px;
-            background-color: #1e293b;
-            border: 1px solid #475569;
+            padding: 14px 16px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
             border-radius: 12px;
-            color: #f1f5f9;
-            font-size: 1.05rem;
+            color: var(--dark-text);
+            font-size: 0.95rem;
+            font-family: 'Noto Sans', sans-serif;
             resize: none;
-            min-height: 60px;
-            max-height: 150px;
+            min-height: 48px;
+            max-height: 120px;
+            transition: all 0.2s ease;
         }
-        
+
         textarea:focus {
             outline: none;
-            border-color: #3b82f6;
+            border-color: var(--primary);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        
+
         button {
-            background-color: #2563eb;
+            background: linear-gradient(135deg, var(--primary), var(--cta));
             color: white;
             border: none;
             border-radius: 12px;
-            padding: 0 25px;
+            padding: 14px 28px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            min-height: 48px;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        
-        button:hover {
-            background-color: #1d4ed8;
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
         }
-        
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
         button:disabled {
-            background-color: #4b5563;
+            opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         .status {
             text-align: center;
             padding: 10px;
-            color: #9ca3af;
-            font-style: italic;
+            color: var(--text-light);
+            font-size: 0.9rem;
             min-height: 24px;
+            animation: fadeIn 0.2s ease;
         }
-        
-        .language-badge {
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .language-indicator {
             display: inline-block;
-            background-color: #7c3aed;
-            color: white;
-            padding: 4px 10px;
+            padding: 8px 16px;
+            background: rgba(249, 115, 22, 0.2);
+            color: var(--cta);
+            border: 1px solid rgba(249, 115, 22, 0.3);
             border-radius: 20px;
-            font-size: 0.8rem;
-            margin-left: 10px;
+            font-size: 0.85rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        
+
+        .language-indicator:hover {
+            background: rgba(249, 115, 22, 0.3);
+            border-color: var(--cta);
+        }
+
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: #94a3b8;
+            padding: 60px 20px;
+            color: var(--text-light);
         }
-        
+
         .empty-state h3 {
-            margin-bottom: 10px;
-            color: #cbd5e1;
+            margin-bottom: 12px;
+            color: var(--dark-text);
+            font-family: 'Be Vietnam Pro', sans-serif;
         }
-        
+
         footer {
             text-align: center;
-            padding: 20px 0 10px;
-            color: #64748b;
-            font-size: 0.9rem;
-            border-top: 1px solid #334155;
-            margin-top: 10px;
+            padding: 20px 0;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
         }
-        
-        /* Scrollbar styling */
+
         .messages::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         .messages::-webkit-scrollbar-track {
-            background: #1e293b;
-            border-radius: 4px;
-        }
-        
-        .messages::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 4px;
-        }
-        
-        .messages::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
+            background: transparent;
         }
 
-        /* Modal de sélection de langue */
+        .messages::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+
         .language-modal {
             display: none;
             position: fixed;
@@ -211,10 +269,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.2s ease;
         }
 
         .language-modal.active {
@@ -222,93 +282,121 @@
         }
 
         .language-modal-content {
-            background-color: #1e293b;
+            background: var(--dark-surface);
             padding: 40px;
             border-radius: 20px;
             text-align: center;
             max-width: 500px;
             width: 90%;
-            border: 2px solid #3b82f6;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         .language-modal h2 {
-            color: #3b82f6;
-            margin-bottom: 15px;
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-family: 'Be Vietnam Pro', sans-serif;
             font-size: 1.8rem;
         }
 
         .language-modal p {
-            color: #94a3b8;
+            color: var(--text-light);
             margin-bottom: 30px;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .language-buttons {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             justify-content: center;
         }
 
         .language-btn {
             flex: 1;
-            padding: 20px 30px;
-            font-size: 1.2rem;
+            padding: 16px 24px;
+            font-size: 1.1rem;
             font-weight: 600;
-            border: 2px solid #3b82f6;
+            border: 2px solid var(--primary);
             border-radius: 12px;
-            background-color: #0f172a;
-            color: #e2e8f0;
+            background: transparent;
+            color: var(--dark-text);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
         }
 
         .language-btn:hover {
-            background-color: #3b82f6;
+            background: var(--primary);
+            color: white;
             transform: translateY(-2px);
         }
 
         .language-btn.selected {
-            background-color: #3b82f6;
-            border-color: #8b5cf6;
-        }
-
-        .language-indicator {
-            display: inline-block;
-            padding: 6px 12px;
-            background-color: #7c3aed;
+            background: var(--primary);
             color: white;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin-left: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s;
         }
 
-        .language-indicator:hover {
-            background-color: #6d28d9;
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(37, 99, 235, 0.2);
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
-        /* Responsive */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-message {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--primary);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .loading-text {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 16px;
             }
-            
+
             h1 {
                 font-size: 2rem;
             }
-            
+
             .input-area {
                 flex-direction: column;
             }
-            
+
             button {
-                padding: 15px;
                 width: 100%;
             }
-            
+
             .message {
                 max-width: 90%;
+            }
+
+            .language-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
@@ -333,31 +421,34 @@
     <div class="container">
         <header>
             <h1>BshAI</h1>
+            <p class="subtitle">Assistant Intelligent en Langues Fon et Yoruba</p>
             <span class="language-indicator" id="languageIndicator" onclick="showLanguageModal()">
-                Langue: Fon
+                🇧🇯 Fon
             </span>
         </header>
-        
+
         <div class="chat-container">
             <div class="messages" id="messagesContainer">
                 <div class="empty-state" id="emptyState">
+                    <h3>Bienvenue sur BshAI</h3>
+                    <p>Posez votre question en français et recevez une réponse en Fon ou Yoruba avec synthèse vocale</p>
                 </div>
             </div>
-            
+
             <div class="input-area">
                 <textarea
                     id="questionInput"
                     placeholder="Posez votre question ici..."
-                    rows="3"
+                    rows="2"
                 ></textarea>
                 <button id="sendButton">Envoyer</button>
             </div>
-            
+
             <div class="status" id="status"></div>
         </div>
-        
+
         <footer>
-            <p>BshAI - Assistant Intelligent en Langues Fon et Yoruba</p>
+            <p>BshAI © 2026 - Assistant Intelligent Multilingue</p>
         </footer>
     </div>
 
@@ -405,7 +496,7 @@
         function showLanguageModal() {
             languageModal.classList.add('active');
         }
-        
+
         function addMessageToUI(role, content, audioSrc = null) {
             if (emptyState.style.display !== 'none') {
                 emptyState.style.display = 'none';
@@ -426,20 +517,64 @@
             messageDiv.appendChild(contentDiv);
 
             if (audioSrc && role === 'ai') {
+                const audioContainer = document.createElement('div');
+                audioContainer.style.marginTop = '12px';
+
                 const audioPlayer = document.createElement('audio');
                 audioPlayer.controls = true;
                 audioPlayer.src = audioSrc;
-                audioPlayer.style.marginTop = '10px';
                 audioPlayer.style.width = '100%';
-                messageDiv.appendChild(audioPlayer);
+                audioPlayer.style.maxWidth = '300px';
+
+                audioContainer.appendChild(audioPlayer);
+                messageDiv.appendChild(audioContainer);
             }
 
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-        
+
         function setStatus(text) {
             statusElement.textContent = text;
+        }
+
+        function showLoadingSpinner(message = "Traitement en cours...") {
+            if (emptyState.style.display !== 'none') {
+                emptyState.style.display = 'none';
+            }
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading-message';
+            loadingDiv.id = 'loadingSpinner';
+
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+
+            const text = document.createElement('span');
+            text.className = 'loading-text';
+            text.textContent = message;
+
+            loadingDiv.appendChild(spinner);
+            loadingDiv.appendChild(text);
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideLoadingSpinner() {
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) {
+                spinner.remove();
+            }
+        }
+
+        function updateLoadingSpinner(message) {
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) {
+                const text = spinner.querySelector('.loading-text');
+                if (text) {
+                    text.textContent = message;
+                }
+            }
         }
         
         function cleanTextForTranslation(text) {
@@ -634,8 +769,9 @@ BshAI: "La capitale du Bénin est Porto-Novo."`;
 
             addMessageToUI('user', question);
             questionInput.value = '';
+            setStatus("");
 
-            setStatus("Génération de la réponse...");
+            showLoadingSpinner("⏳ Génération de la réponse...");
 
             try {
                 const zaiResponse = await getZAIResponse(question);
@@ -644,27 +780,27 @@ BshAI: "La capitale du Bénin est Porto-Novo."`;
                     throw new Error("Impossible d'obtenir une réponse de bshAI.");
                 }
 
-                const langName = selectedLanguage === 'fon' ? 'Fon' : 'Yoruba';
-                setStatus(`Traduction en ${langName}...`);
                 const translation = await translateText(zaiResponse);
 
                 if (!translation) {
                     throw new Error("Problème avec la traduction.");
                 }
 
-                setStatus("Génération de l'audio...");
+                updateLoadingSpinner("🎵 Génération de l'audio...");
                 const audioUrl = await getAudio(translation, selectedLanguage);
 
                 if (!audioUrl) {
                     throw new Error("Impossible de générer l'audio.");
                 }
 
+                hideLoadingSpinner();
                 addMessageToUI('ai', translation, audioUrl);
                 setStatus("");
 
             } catch (error) {
                 console.error(error);
-                setStatus(`Erreur: ${error.message}`);
+                hideLoadingSpinner();
+                setStatus(`❌ Erreur: ${error.message}`);
                 addMessageToUI('ai', "Désolé, une erreur s'est produite. Veuillez réessayer.");
             } finally {
                 isProcessing = false;
