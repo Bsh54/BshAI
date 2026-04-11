@@ -377,15 +377,31 @@
 
             .input-area {
                 flex-direction: column;
+                gap: 12px;
+            }
+
+            textarea {
+                width: 100%;
+                min-height: 56px;
+                padding: 14px 16px;
+                font-size: 1rem;
             }
 
             button {
                 width: 100%;
+                min-height: 56px;
+                padding: 16px 24px;
+                font-size: 1rem;
             }
 
             .message {
                 max-width: 90%;
             }
+
+            .language-buttons {
+                flex-direction: column;
+            }
+        }
 
             .language-buttons {
                 flex-direction: column;
@@ -454,9 +470,9 @@
 
     <script>
         // Configuration des API
-        const ZAI_API_URL = "https://api.airforce/v1/chat/completions";
-        const ZAI_API_KEY = "sk-air-O8ItxWRjXzrCUS4olwNuak6EMmhx2EcbS8X3Zfr36ikW7q1ChN1uYQEDXEk2zU72";
-        const ZAI_MODEL = "roleplay:free";
+        const ZAI_API_URL = "https://ds2api-tau-woad.vercel.app/v1/chat/completions";
+        const ZAI_API_KEY = "sk-ds2api-key-1-your-custom-key";
+        const ZAI_MODEL = "deepseek-chat";
 
         const TRANSLATE_API_URL = "https://shadsai2api-cloudflare.shadobsh.workers.dev/v1/chat/completions";
         const TRANSLATE_API_KEY = "1";
@@ -651,7 +667,8 @@ BshAI: "La capitale du Bénin est Porto-Novo."`;
                 const response = await fetch(ZAI_API_URL, {
                     method: 'POST',
                     headers: headers,
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    mode: 'cors'
                 });
 
                 if (!response.ok) {
