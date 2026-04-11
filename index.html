@@ -803,15 +803,47 @@ BshAI: "La capitale du Bénin est Porto-Novo."`;
                     throw new Error("Problème avec la traduction.");
                 }
 
-                updateLoadingSpinner("🎵 Génération de l'audio...");
+                // Afficher la réponse immédiatement
+                hideLoadingSpinner();
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ai-message';
+                messageDiv.id = 'aiMessage';
+
+                const header = document.createElement('div');
+                header.className = 'message-header';
+                header.textContent = 'bshAI';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.textContent = translation;
+
+                messageDiv.appendChild(header);
+                messageDiv.appendChild(contentDiv);
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // Générer l'audio en arrière-plan
+                showLoadingSpinner("🎵 Génération de l'audio...");
                 const audioUrl = await getAudio(translation, selectedLanguage);
 
                 if (!audioUrl) {
                     throw new Error("Impossible de générer l'audio.");
                 }
 
+                // Ajouter le lecteur audio au message
                 hideLoadingSpinner();
-                addMessageToUI('ai', translation, audioUrl);
+                const audioContainer = document.createElement('div');
+                audioContainer.style.marginTop = '12px';
+
+                const audioPlayer = document.createElement('audio');
+                audioPlayer.controls = true;
+                audioPlayer.src = audioUrl;
+                audioPlayer.style.width = '100%';
+                audioPlayer.style.maxWidth = '300px';
+
+                audioContainer.appendChild(audioPlayer);
+                messageDiv.appendChild(audioContainer);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 setStatus("");
 
             } catch (error) {
